@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chapter 4: Applications of Derivatives — Bequation_SDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']] } };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <style>
+    :root {
+      --panel: #f1f2f4; --header: #1f3f74; --canvas: #ffffff; --border: #e5e7eb;
+      --danger: #ef4444; --text: #0f172a; --muted: #334155; --primary: #1f3f74;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text); background: var(--panel);
+      display: grid; grid-template-rows: auto 1fr auto; min-height: 100vh;
+    }
+    header {
+      background: var(--header); color: #fff; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;
+    }
+    header .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    header img { height: 28px; display: block; }
+    nav { display: flex; gap: 12px; }
+    nav a { color: #fff; text-decoration: none; font-weight: 600; }
+    .top-actions {
+      display: flex; gap: 8px; justify-content: flex-end; margin: 12px 16px 0;
+    }
+    .btn {
+      padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: #fff; color: var(--text); cursor: pointer; text-decoration: none;
+    }
+    .btn.primary { background: var(--primary); color: #fff; border-color: transparent; }
+    main {
+      background: #fff; margin: 16px; border-radius: 12px; border: 1px solid var(--border);
+      padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    h2 { margin-top: 18px; font-size: 18px; }
+    ul, ol { padding-left: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #fff; }
+    .prompt {
+      background: var(--canvas); border: 1px dashed var(--border); border-radius: 8px;
+      padding: 8px 10px; margin-top: 8px; font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+    .note { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    .ans { color: #0f766e; }
+    .hint { color: #7c3aed; }
+    blockquote { border-left: 3px solid var(--border); padding-left: 10px; color: var(--muted); }
+    footer {
+      background: var(--panel); border-top: 1px solid var(--border);
+      padding: 10px 16px; font-size: 13px; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><span>Bequation_SDU</span></div>
+    <nav>
+      <a href="chapter1.html">Chapter 1</a>
+      <a href="chapter2.html">Chapter 2</a>
+      <a href="chapter3.html">Chapter 3</a>
+      <a href="chapter4.html">Chapter 4</a>
+    </nav>
+  </header>
+
+  <div class="top-actions">
+    <a class="btn" href="index.html">Grapher</a>
+    <a class="btn primary" href="index.html">Add Function</a>
+  </div>
+
+  <main>
+    <h1>Chapter 4: Applications of derivatives</h1>
+    <p class="note">Критикалық нүктелер, монотондық, қисықтық/иілу, оптимизация, МВТ және related rates.</p>
+
+    <h2>Key concepts</h2>
+    <ul>
+      <li><strong>Critical points:</strong> \(f'(x)=0\) немесе анықталмаған</li>
+      <li><strong>Monotonicity:</strong> \(f'>0\Rightarrow\) өседі, \(f'<0\Rightarrow\) кемиді</li>
+      <li><strong>Concavity/Inflection:</strong> \(f''>0\Rightarrow\) жоғары, \(f''<0\Rightarrow\) төмен; белгі өзгерісі — иілу</li>
+      <li><strong>Mean Value Theorem (MVT):</strong> \(\exists c\in(a,b)\) with \(f'(c)=\frac{f(b)-f(a)}{b-a}\)</li>
+      <li><strong>Optimization:</strong> критикалық және шеткі нүктелерді тексеру</li>
+      <li><strong>Related rates:</strong> уақыт бойынша тәуелді шамалар туындысы</li>
+    </ul>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>Examples</h2>
+        <ul>
+          <li>Optimization: \(A(x)=x(10-2x)\Rightarrow x=2.5,\ A_{\max}=12.5\)</li>
+          <li>Inflection: \(f(x)=x^3\Rightarrow f''(x)=6x\) ⇒ \(x=0\)</li>
+          <li>Related rates: \(V=\frac{4}{3}\pi r^3\Rightarrow \frac{dV}{dt}=4\pi r^2\frac{dr}{dt}\)</li>
+          <li>Curve sketching: домен, асимптоталар, criticals, concavity</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Bequation_SDU prompts</h2>
+        <div class="prompt">y=x^3-3x, -3<=x<=3</div>
+        <div class="prompt">y=cosx; y=-cosx</div>
+        <div class="prompt">y=-x^2+10x, 0<=x<=10</div>
+        <div class="prompt">y=lnx; tangent at x=1 (y=x-1)</div>
+        <div class="prompt">y=exp(-x^2), -3<=x<=3</div>
+      </div>
+    </div>
+
+    <h2>Problem set (10+)</h2>
+    <ol>
+      <li>Critical points: \(f(x)=x^3-3x^2+2\). <span class="ans">\(x=0,2\)</span></li>
+      <li>Second derivative test: \(f(x)=x^4-4x^2\). <span class="hint">Use \(f'',\) classify</span></li>
+      <li>MVT: \(f(x)=x^2\) on \([1,3]\). <span class="ans">\(c=2\)</span></li>
+      <li>Optimization (box): perimeter \(20\), \(A=x(10-x)\). <span class="ans">\(x=5,\ A_{\max}=25\)</span></li>
+      <li>Related rates (cone): \(V=\frac{1}{3}\pi r^2 h\). <span class="ans">\(\frac{dV}{dt}=\frac{1}{3}\pi(2r h\,r'+r^2 h')\)</span></li>
+      <li>Curve sketch: \(f(x)=\frac{1}{x}\). <span class="ans">VA: \(x=0\), decreasing on each side</span></li>
+      <li>Concavity: \(f(x)=\cos x\). <span class="ans">\(f''(x)=-\cos x\) ⇒ up on \((\pi/2,3\pi/2)\)</span></li>
+      <li>Inflection: \(f(x)=x^3-6x\). <span class="ans">\(f''=6x\Rightarrow x=0\)</span></li>
+      <li>Optimization (profit): \(P(x)=100x-5x^2\). <span class="ans">\(x=10,\ P_{\max}=500\)</span></li>
+      <li>Newton’s method step: \(f(x)=x^2-2\), \(x_0=1\). <span class="ans">\(x_1=1-\frac{-1}{2}=1.5\)</span></li>
+      <li>Speed/accel: \(s(t)=t^3-3t\). <span class="ans">\(v=3t^2-3,\ a=6t\)</span></li>
+    </ol>
+
+    <blockquote>Толық оқу үшін қараңыз: Thomas’ Calculus, 13th Edition.</blockquote>
+  </main>
+
+  <footer>© Bequation_SDU — Chapter 4 expanded summary and problems.</footer>
+</body>
+</html>

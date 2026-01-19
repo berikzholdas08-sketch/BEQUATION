@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculus Menu — Bequation_SDU</title>
+  <style>
+    :root {
+      --panel:#f1f2f4; --header:#1f3f74; --border:#e5e7eb;
+      --text:#0f172a; --muted:#334155; --primary:#1f3f74;
+    }
+    body { font-family: Arial, sans-serif; margin:0; background:var(--panel); color:var(--text); display:flex; flex-direction:column; min-height:100vh; }
+    header { background:var(--header); color:#fff; padding:15px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    header img { height:40px; margin-right:15px; }
+    header h1 { margin:0; font-size:24px; }
+    main { flex:1; display:flex; flex-direction:column; align-items:center; padding:30px; }
+    .intro { max-width:700px; text-align:center; margin-bottom:30px; font-size:18px; }
+    .menu { display:flex; flex-direction:column; gap:15px; width:100%; max-width:400px; }
+    .menu a { background:var(--primary); color:#fff; padding:15px; border-radius:10px; text-decoration:none; font-size:18px; font-weight:bold; text-align:center; transition:background 0.3s; }
+    .menu a:hover { background:#1f3f74; }
+    footer { background:var(--header); color:#fff; text-align:center; padding:10px; }
+    .nav-links { margin-top:30px; display:flex; gap:12px; }
+    .nav-links a { background:var(--primary); color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; }
+    .nav-links a:hover { background:#1f3f74; }
+  </style>
+</head>
+<body>
+  <header onclick="location.href='index.html'">
+    <img src="blob:https://web.whatsapp.com/8a303174-8a4c-4cb1-ac99-412d7d4c36b4" alt="Logo">
+    <h1>Bequation_SDU — Calculus</h1>
+  </header>
+  <main>
+    <div class="intro">
+      <p>Бұл бөлімде Calculus пәнінің 4 тарауын таңдай аласыз:</p>
+    </div>
+    <div class="menu">
+      <a href="chapter1.html">📘 Chapter 1: Functions</a>
+      <a href="chapter2.html">📗 Chapter 2: Limits and Continuity</a>
+      <a href="chapter3.html">📙 Chapter 3: Derivatives</a>
+      <a href="chapter4.html">📕 Chapter 4: Applications of Derivatives</a>
+    </div>
+
+    <div class="nav-links">
+      <a href="terminology.html">Terminology</a>
+      <a href="graphing.html">Graphing</a>
+      <a href="index.html">Басты бет</a>
+    </div>
+  </main>
+  <footer>
+    © SDU University — Mathematics 1 курс студенті Жолдас Берік
+  </footer>
+</body>
+</html>

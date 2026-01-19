@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8">
+  <title>Terminology — Bequation_SDU</title>
+  <style>
+    :root {
+      --panel:#f1f2f4; --header:#1f3f74; --canvas:#ffffff; --border:#e5e7eb;
+      --danger:#ef4444; --text:#0f172a; --muted:#334155; --primary:#1f3f74;
+    }
+    body { font-family: Arial, sans-serif; margin: 0; background: var(--panel); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
+    header { background: var(--header); color: #fff; padding: 15px; display: flex; align-items: center; justify-content: center; cursor:pointer; }
+    header img { height: 40px; margin-right: 15px; }
+    header h1 { margin: 0; font-size: 24px; }
+    main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    .search-container { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 400px; }
+    #searchBox { flex: 1; padding: 10px; font-size: 16px; border: 1px solid var(--border); border-radius: 5px 0 0 5px; text-align: center; }
+    #searchBtn { padding: 10px 15px; border: 1px solid var(--border); border-left: none; background: var(--header); color: #fff; cursor: pointer; border-radius: 0 5px 5px 0; font-size: 18px; }
+    #results { margin-top: 20px; width: 100%; max-width: 700px; display: flex; flex-direction: column; align-items: center; }
+    .term-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: left; width: 100%; }
+    .term-card h2 { margin: 0 0 10px; color: var(--header); text-align: center; }
+    .term-card div { margin: 10px 0; }
+    .term-card img { max-width: 100%; margin: 10px 0; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .nav-links { margin-top:20px; display:flex; gap:12px; }
+    .nav-links a { background: var(--primary); color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; }
+    .nav-links a:hover { background:#1f3f74; }
+    footer { background: var(--header); color: #fff; text-align: center; padding: 10px; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <header onclick="location.href='index.html'">
+    <h1>BEQUATION_SDU</h1>
+  </header>
+  
+  <main>
+    <div class="search-container">
+      <input type="text" id="searchBox" placeholder="Математикалық терминді енгізіңіз...">
+      <button id="searchBtn">🔍</button>
+    </div>
+    <div id="results"></div>
+
+    <!-- Навигация -->
+    <div class="nav-links">
+      <a href="calculus.html">Calculus</a>
+      <a href="graphing.html">Graphing</a>
+      <a href="index.html">Басты бет</a>
+    </div>
+  </main>
+  <footer>
+    <b>Орындаған:</b> SDU University, Mathematics 1 курс студенті Жолдас Берік
+  </footer>
+
+  <!-- Мәліметтер базасын бөлек қосамыз -->
+  <script src="db.js"></script>
+  <script>
+    const searchBox = document.getElementById('searchBox');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultsDiv = document.getElementById('results');
+
+    function showResults(query) {
+      resultsDiv.innerHTML = "";
+      if (query.length > 0) {
+        const found = mathDB.filter(item =>
+          item.term.toLowerCase().includes(query) ||
+          item.english.toLowerCase().includes(query)
+        );
+        if (found.length > 0) {
+          found.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'term-card';
+            card.innerHTML = `
+              <h2>${item.term} (${item.english})</h2>
+              <div><strong>Анықтама:</strong><br>${marked.parse(item.definition)}</div>
+              <div><strong>Мысал:</strong><br>${marked.parse(item.example)}</div>
+            `;
+            if (item.images && item.images.length > 0) {
+              item.images.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = item.term;
+                card.appendChild(img);
+              });
+            }
+            resultsDiv.appendChild(card);
+          });
+        } else {
+          resultsDiv.innerHTML = "<p>Термин табылмады.</p>";
+        }
+      }
+    }
+
+    searchBox.addEventListener('input', function(e) {
+      const query = e.target.value.trim().toLowerCase();
+      if (query.length > 0) {
+        showResults(query);
+        searchBtn.textContent = "🧽";
+      } else {
+        resultsDiv.innerHTML = "";
+        searchBtn.textContent = "🔍";
+      }
+    });
+
+    searchBtn.addEventListener('click', function() {
+      if (searchBtn.textContent === "🧽") {
+        searchBox.value = "";
+        resultsDiv.innerHTML = "";
+        searchBtn.textContent = "🔍";
+      }
+    });
+  </script>
+</body>
+</html>

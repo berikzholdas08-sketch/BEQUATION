@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chapter 1: Functions — Bequation_SDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- MathJax for LaTeX -->
+  <script>
+    window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']] } };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <style>
+    :root {
+      --panel: #f1f2f4; --header: #1f3f74; --canvas: #ffffff; --border: #e5e7eb;
+      --danger: #ef4444; --text: #0f172a; --muted: #334155; --primary: #1f3f74;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text); background: var(--panel);
+      display: grid; grid-template-rows: auto 1fr auto; min-height: 100vh;
+    }
+    header {
+      background: var(--header); color: #fff; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;
+      cursor: pointer;
+    }
+    header .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    header img { height: 28px; display: block; }
+    nav { display: flex; gap: 12px; }
+    nav a { color: #fff; text-decoration: none; font-weight: 600; }
+    .top-actions {
+      display: flex; gap: 8px; justify-content: flex-end; margin: 12px 16px 0;
+    }
+    .btn {
+      padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: #fff; color: var(--text); cursor: pointer; text-decoration: none;
+    }
+    .btn.primary { background: var(--primary); color: #fff; border-color: transparent; }
+    main {
+      background: #fff; margin: 16px; border-radius: 12px; border: 1px solid var(--border);
+      padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    h2 { margin-top: 18px; font-size: 18px; }
+    ul, ol { padding-left: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #fff; }
+    .prompt {
+      background: var(--canvas); border: 1px dashed var(--border); border-radius: 8px;
+      padding: 8px 10px; margin-top: 8px; font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+    .note { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    .ans { color: #0f766e; }
+    .hint { color: #7c3aed; }
+    blockquote { border-left: 3px solid var(--border); padding-left: 10px; color: var(--muted); }
+    .nav-links { margin-top: 20px; display: flex; gap: 12px; }
+    .nav-links a { background: var(--primary); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; }
+    .nav-links a:hover { background: #1f3f74; }
+    footer {
+      background: var(--header); color:#fff; border-top: 1px solid var(--border);
+      padding: 10px 16px; font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header onclick="location.href='index.html'">
+    <div class="brand"><span>Bequation_SDU</span></div>
+    <nav>
+      <a href="chapter1.html">Chapter 1</a>
+      <a href="chapter2.html">Chapter 2</a>
+      <a href="chapter3.html">Chapter 3</a>
+      <a href="chapter4.html">Chapter 4</a>
+    </nav>
+  </header>
+
+  <div class="top-actions">
+    <a class="btn" href="graphing.html">Graphing</a>
+    <a class="btn primary" href="terminology.html">Terminology</a>
+  </div>
+
+  <main>
+    <h1>Chapter 1: Functions</h1>
+    <p class="note">Функциялар: анықтамалар, домен/диапазон, түрлендірулер, композиция және кері функциялар.</p>
+
+    <h2>Key concepts</h2>
+    <ul>
+      <li><strong>Function:</strong> әр \(x\) үшін бір ғана \(f(x)\).</li>
+      <li><strong>Domain / Range:</strong> рұқсат етілген кіріс және шығатын мәндер.</li>
+      <li><strong>Even / Odd:</strong> \(f(-x)=f(x)\) / \(f(-x)=-f(x)\).</li>
+      <li><strong>Transformations:</strong> \(f(x)+c\), \(f(x-c)\), \(-f(x)\), \(f(kx)\).</li>
+      <li><strong>Composite:</strong> \((f\circ g)(x)=f(g(x))\).</li>
+      <li><strong>Inverse:</strong> бірмәнді \(f\) үшін \(f^{-1}(f(x))=x\).</li>
+      <li><strong>Piecewise:</strong> әр интервалда жеке ереже.</li>
+      <li><strong>Absolute value:</strong> \(|x|=\begin{cases}x,&x\ge 0\\-x,&x<0\end{cases}\).</li>
+    </ul>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>Examples</h2>
+        <ul>
+          <li><strong>Domain (root):</strong> \(f(x)=\sqrt{x-2}\Rightarrow x\ge 2\).</li>
+          <li><strong>Domain (rational):</strong> \(f(x)=\frac{x-1}{x^2-9}\Rightarrow x\ne \pm3\).</li>
+          <li><strong>Even/Odd:</strong> \(x^2\) — even, \(x^3\) — odd.</li>
+          <li><strong>Composition:</strong> \(f(x)=\sqrt{x},\ g(x)=x^2+1\Rightarrow (f\circ g)(x)=\sqrt{x^2+1}\).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Bequation_SDU prompts</h2>
+        <div class="prompt">y=|x|, -5<=x<=5</div>
+        <div class="prompt">y=sqrt(x-2), 0<=x<=10</div>
+        <div class="prompt">y=sinx; y=cosx; y=tanx</div>
+        <div class="prompt">y=1/(x-3), 0<x<6</div>
+        <div class="prompt">y=e^x; y=x^3</div>
+      </div>
+    </div>
+
+    <h2>Problem set (10+)</h2>
+    <ol>
+      <li><strong>Domain:</strong> \(f(x)=\sqrt{9-x^2}\). <span class="ans">Dom: \([-3,3]\), Range: \([0,3]\)</span></li>
+      <li><strong>Inverse:</strong> \(f(x)=2x+5\). <span class="ans">\(f^{-1}(y)=\frac{y-5}{2}\)</span></li>
+      <li><strong>Even/odd:</strong> \(f(x)=x^2-4\). <span class="ans">Even</span></li>
+      <li><strong>Composite domain:</strong> \(f(x)=\sqrt{x},\ g(x)=\ln(x-1)\). <span class="ans">\(x>1\)</span></li>
+      <li><strong>Piecewise continuity:</strong> \(f(x)=\begin{cases}x+1,&x<0\\x^2,&x\ge0\end{cases}\). <span class="ans">Not continuous at 0</span></li>
+      <li><strong>Range:</strong> \(f(x)=|x-2|\). <span class="ans">\([0,\infty)\)</span></li>
+      <li><strong>Transform:</strong> \(y=\sin(x)+2\). <span class="ans">Shift up 2</span></li>
+      <li><strong>Domain (log):</strong> \(f(x)=\ln(3-x)\). <span class="ans">\(x<3\)</span></li>
+      <li><strong>Rational holes:</strong> \(f(x)=\frac{x^2-1}{x-1}\). <span class="ans">Hole at \(x=1\), value 2</span></li>
+      <li><strong>Inverse existence:</strong> \(f(x)=x^2\) on \(\mathbb{R}\). <span class="ans">Not one-to-one</span></li>
+      <li><strong>Restrict for inverse:</strong> \(f(x)=x^2\) on \([0,\infty)\). <span class="ans">\(f^{-1}(y)=\sqrt{y}\)</span></li>
+    </ol>
+
+    <div class="nav-links">
+      <a href="calculus.html">Calculus Menu</a>
+      <a href="terminology.html">Terminology</a>
+      <a href="graphing.html">Graphing</a>
+      <a href="index.html">Басты бет</a>
+    </div>
+
+    <blockquote>Толық оқу үшін қараңыз: Thomas’ Calculus, 13th Edition.</blockquote>
+  </main>
+
+  <footer>© Bequation_SDU — Chapter 1 expanded summary and problems.</footer>
+</body>
+</html>

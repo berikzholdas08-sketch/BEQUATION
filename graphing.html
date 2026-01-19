@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Graphing — Bequation_SDU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <style>
+    :root {
+      --panel: #f1f2f4; --header: #1f3f74; --canvas: #ffffff; --border: #e5e7eb;
+      --danger: #ef4444; --text: #0f172a; --muted: #334155; --primary: #1f3f74;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:Inter,system-ui,Arial,sans-serif; color:var(--text); background:var(--panel);
+           display:grid; grid-template-rows:auto auto 1fr auto; min-height:100vh; }
+    header { padding:12px 16px; border-bottom:1px solid var(--border); background:var(--header);
+             display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    header h1 { margin:0; font-size:20px; font-weight:700; display:flex; align-items:center; gap:10px; color:#fff; }
+    header img { height:28px; display:block; }
+    .toolbar { padding:8px 16px; border-bottom:1px solid var(--border); background:var(--panel);
+               display:flex; gap:8px; align-items:center; }
+    .toolbar .right { margin-left:auto; display:flex; gap:8px; align-items:center; }
+    .btn { padding:8px 12px; border:1px solid var(--border); border-radius:8px; background:#fff;
+           cursor:pointer; color:var(--text); text-decoration:none; }
+    .btn.primary { background:var(--primary); color:#fff; border-color:transparent; }
+    .btn.danger { background:var(--danger); color:#fff; border-color:transparent; }
+    .inputbar { padding:8px 16px; display:flex; gap:8px; align-items:center; border-bottom:1px solid var(--border); background:var(--panel); }
+    .inputbar input { flex:1; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:#fff; color:var(--text); outline:none; }
+    .scene { display:grid; grid-template-columns:1fr 280px; gap:0; height:calc(100vh - 200px); }
+    #canvas { width:100%; height:100%; background:var(--canvas); cursor:grab; }
+    .sidebar { border-left:1px solid var(--border); background:var(--panel); display:flex; flex-direction:column; }
+    .sidebar h3 { margin:0; padding:10px 12px; font-size:14px; border-bottom:1px solid var(--border); background:var(--panel); color:var(--muted); }
+    .list { padding:8px; overflow:auto; flex:1; }
+    .item { border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:8px;
+            display:grid; grid-template-columns:1fr auto; gap:6px; align-items:center; background:#fff; }
+    .item .meta { font-size:12px; color:var(--muted); }
+    .item .row { display:flex; gap:6px; }
+    .swatch { width:14px; height:14px; border-radius:3px; border:1px solid #0002; }
+    .status { font-size:12px; color:var(--muted); padding:6px 16px; border-top:1px solid var(--border); background:var(--panel); }
+    .error { color:var(--danger); font-size:12px; min-height:18px; padding:6px 16px; }
+    footer { background:var(--header); color:#fff; text-align:center; padding:10px; }
+    .nav-links { margin-top:10px; display:flex; gap:12px; justify-content:center; }
+    .nav-links a { background:var(--primary); color:#fff; padding:8px 14px; border-radius:8px; text-decoration:none; }
+    .nav-links a:hover { background:#1f3f74; }
+  </style>
+</head>
+<body>
+  <header onclick="location.href='index.html'">
+    <h1>
+      
+      BEQUATION_SDU — Graphing
+    </h1>
+  </header>
+
+  <div class="toolbar">
+    <div class="right">
+
+    <div class="nav">
+    <nav class="nav-links">
+        <a class="btn primary" id="addFunc">Add Function</a>
+      <a href="index.html">HOME</a>
+      <a href="calculus.html">CALCULUS</a>
+      <a href="terminology.html">TERMINOLOGY</a>
+    </nav>
+  </div>
+    </div>
+  </div>
+
+  <div class="inputbar">
+    <input id="expr" type="text" placeholder="Мысалы: y=tan(x), y=ln(x), y=log(x), y=cot(x), y=arctan(x), y=x^2, 0<=x<=9" />
+  </div>
+
+  <div class="error" id="error"></div>
+  <div class="status" id="calcResult"></div>
+
+  <div class="scene">
+    <canvas id="canvas"></canvas>
+    <aside class="sidebar">
+      <h3>Объектілер</h3>
+      <div class="list" id="list"></div>
+      <div class="status" id="status">x=0, y=0 | scale=50 px/unit</div>
+    </aside>
+  </div>
+
+  <div class="nav-links">
+     <button class="btn" id="calcBtn"></button>
+      <button class="btn" id="gridToggle"></button>
+      <button class="btn" id="resetView"></button>
+  </div>
+
+  <footer>© SDU University — Mathematics 1 курс студенті Жолдас Берік</footer>
+
+  <script>
+    // ---------- Helpers ----------
+    const PALETTE = ['#2563eb','#16a34a','#f59e0b','#7c3aed','#0d9488','#db2777','#ef4444','#22c55e'];
+    let colorIndex = 0;
+    function nextColor(){ return PALETTE[colorIndex++ % PALETTE.length]; }
+
+    function normalizeAliases(s){
+      // xx -> x^2, xxx -> x^3
+      s = s.replace(/x\s*x\s*x/g,'x^3').replace(/xxx/g,'x^3');
+      s = s.replace(/x\s*x/g,'x^2').replace(/xx/g,'x^2');
+
+      // тригонометрия қысқартулары
+      s = s.replace(/\bsinx\b/gi,'sin(x)');
+      s = s.replace(/\bcosx\b/gi,'cos(x)');
+      s = s.replace(/\btanx\b/gi,'tan(x)');
+      s = s.replace(/\bcotx\b/gi,'cot(x)');
+      s = s.replace(/\barctanx\b/gi,'atan(x)');
+      s = s.replace(/\barccotx\b/gi,'acot(x)');
+      s = s.replace(/\barcsinx\b/gi,'asin(x)');
+      s = s.replace(/\barccosx\b/gi,'acos(x)');
+
+      // логарифмдер
+      s = s.replace(/\blnx\b/gi,'log(x)');     // табиғи логарифм
+      s = s.replace(/\blogx\b/gi,'log10(x)');  // ондық логарифм
+
+      // экспонента
+      s = s.replace(/\bex\b/gi,'exp(x)');      // ex → exp(x)
+      // e^x түрін exp(x) қылып ауыстыру
+      s = s.replace(/\be\^x\b/gi,'exp(x)');
+
+      return s;
+    }
+
+    // Parse input, support: "y = expr, 0<=x<=9" or "expr, 0<x<9" (comma required between function and domain)
+    function parseExpression(input){
+      let s = (input || '').trim();
+      if (!s) throw new Error('Бос енгізу');
+      s = normalizeAliases(s);
+
+      let xmin = -Infinity, xmax = Infinity, inclusiveMin = true, inclusiveMax = true;
+
+      // Extract domain part after a comma
+      const domainPartMatch = s.match(/,(.*)$/);
+      if (domainPartMatch){
+        const d = domainPartMatch[1].trim();
+        const range = d.match(/^([\-+]?\d*\.?\d+)\s*(<=|<)\s*x\s*(<=|<)\s*([\-+]?\d*\.?\d+)$/);
+        if (!range) throw new Error('Аралық дұрыс форматта емес. Мысалы: y=x^2, 0<=x<=9 немесе y=x^2, 0<x<9');
+        xmin = parseFloat(range[1]);
+        xmax = parseFloat(range[4]);
+        inclusiveMin = range[2] === '<='; // 0<=x...
+        inclusiveMax = range[3] === '<='; // x<=9
+        // remove domain from s
+        s = s.slice(0, domainPartMatch.index).trim();
+      }
+
+      // Accept y=... or bare expression
+      const m = s.match(/^y\s*=\s*(.+)$/i);
+      const rhs = m ? m[1].trim() : s.trim();
+
+      // Compile expression with math.js
+      const compiled = math.compile(rhs);
+      return { compiled, rhs, xmin, xmax, inclusiveMin, inclusiveMax };
+    }
+
+    // ---------- Canvas / viewport ----------
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const statusEl = document.getElementById('status');
+    const errorEl = document.getElementById('error');
+    const calcResult = document.getElementById('calcResult');
+
+    let W = 0, H = 0;
+    let originX = 0, originY = 0; // px
+    let scale = 50;                // px per unit
+    let showGrid = true;
+
+    function resize(){
+      W = canvas.clientWidth; H = canvas.clientHeight;
+      canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
+      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+      draw();
+    }
+    window.addEventListener('resize', resize);
+
+    function toScreen(x,y){ return { sx: originX + x*scale, sy: originY - y*scale }; }
+    function toWorld(sx,sy){ return { x: (sx - originX)/scale, y: (originY - sy)/scale }; }
+
+    // ---------- Objects ----------
+    const objects = []; // {type:'func', expr, compiled, color, visible, xmin, xmax, inclusiveMin, inclusiveMax}
+
+    function addFunction(input){
+      const { compiled, rhs, xmin, xmax, inclusiveMin, inclusiveMax } = parseExpression(input);
+      const color = nextColor();
+      objects.push({ type:'func', expr: rhs, compiled, color, visible: true, xmin, xmax, inclusiveMin, inclusiveMax });
+      refreshList();
+      draw();
+    }
+    function updateFunction(idx, input){
+      const { compiled, rhs, xmin, xmax, inclusiveMin, inclusiveMax } = parseExpression(input);
+      const obj = objects[idx];
+      obj.compiled = compiled;
+      obj.expr = rhs;
+      obj.xmin = xmin;
+      obj.xmax = xmax;
+      obj.inclusiveMin = inclusiveMin;
+      obj.inclusiveMax = inclusiveMax;
+      refreshList();
+      draw();
+    }
+    function removeObject(idx){
+      objects.splice(idx,1);
+      refreshList();
+      draw();
+    }
+
+    // ---------- Rendering ----------
+    function drawGrid(){
+      if (!showGrid) return;
+      const stepPx = scale;
+      const startX = originX % stepPx;
+      const startY = originY % stepPx;
+
+      ctx.save();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#e2e8f0';
+      for (let x = startX; x <= W; x += stepPx) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = startY; y <= H; y += stepPx) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function pickNiceStep(){
+      const target = 100 / scale;
+      const candidates = [1,2,5,10,20,50,0.5,0.2,0.1,0.05,0.02];
+      let best = candidates[0];
+      for (const c of candidates) {
+        if (Math.abs(c - target) < Math.abs(best - target)) best = c;
+      }
+      return best;
+    }
+
+    function drawAxes(){
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#64748b';
+      // x-axis
+      ctx.beginPath(); ctx.moveTo(0, originY); ctx.lineTo(W, originY); ctx.stroke();
+      // y-axis
+      ctx.beginPath(); ctx.moveTo(originX, 0); ctx.lineTo(originX, H); ctx.stroke();
+
+      // ticks and labels
+      ctx.fillStyle = '#334155';
+      ctx.font = '12px Inter, Arial, sans-serif';
+      const stepUnit = pickNiceStep();
+
+      const xMinView = toWorld(0,0).x;
+      const xMaxView = toWorld(W,0).x;
+      const firstXT = Math.ceil(xMinView / stepUnit) * stepUnit;
+      for (let x = firstXT; x <= xMaxView; x += stepUnit) {
+        const s = toScreen(x,0);
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.beginPath(); ctx.moveTo(s.sx, originY - 5); ctx.lineTo(s.sx, originY + 5); ctx.stroke();
+        if (Math.abs(x) > 1e-9) ctx.fillText(x.toString(), s.sx + 4, originY - 6);
+      }
+
+      const yMinView = toWorld(0,H).y;
+      const yMaxView = toWorld(0,0).y;
+      const firstYT = Math.ceil(yMinView / stepUnit) * stepUnit;
+      for (let y = firstYT; y <= yMaxView; y += stepUnit) {
+        const s = toScreen(0,y);
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.beginPath(); ctx.moveTo(originX - 5, s.sy); ctx.lineTo(originX + 5, s.sy); ctx.stroke();
+        if (Math.abs(y) > 1e-9) ctx.fillText(y.toString(), originX + 8, s.sy - 4);
+      }
+
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText('0', originX + 6, originY - 6);
+      ctx.restore();
+    }
+
+    function withinDomain(x, obj){
+      const leftOk  = obj.inclusiveMin ? (x >= obj.xmin) : (x > obj.xmin);
+      const rightOk = obj.inclusiveMax ? (x <= obj.xmax) : (x < obj.xmax);
+      return leftOk && rightOk;
+    }
+
+    function drawFunctions(){
+      ctx.save();
+      for (const obj of objects) {
+        if (obj.type !== 'func' || !obj.visible) continue;
+        ctx.strokeStyle = obj.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        let started = false;
+
+        // Intersection of domain and current view
+        const viewXMin = toWorld(0,0).x;
+        const viewXMax = toWorld(W,0).x;
+        const xMin = Math.max(obj.xmin, viewXMin);
+        const xMax = Math.min(obj.xmax, viewXMax);
+        if (xMin > xMax) continue;
+
+        const samples = Math.max(400, Math.min(1200, Math.floor(W * 1.2)));
+        for (let i = 0; i <= samples; i++) {
+          const t = i / samples;
+          const x = xMin + (xMax - xMin) * t;
+          if (!withinDomain(x, obj)) { started = false; continue; }
+          let y;
+          try {
+            y = obj.compiled.evaluate({ x, e: Math.E, pi: Math.PI });
+            if (!isFinite(y)) y = null;
+          } catch { y = null; }
+          if (y == null) { started = false; continue; }
+          const { sx, sy } = toScreen(x, y);
+          if (!started) { ctx.moveTo(sx, sy); started = true; }
+          else { ctx.lineTo(sx, sy); }
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      drawGrid();
+      drawAxes();
+      drawFunctions();
+      const centerWorld = toWorld(W/2, H/2);
+      statusEl.textContent = `x=${centerWorld.x.toFixed(2)}, y=${centerWorld.y.toFixed(2)} |  scale=${scale.toFixed(0)} px/unit`;
+    }
+
+    // ---------- Sidebar list ----------
+    const listEl = document.getElementById('list');
+    function refreshList(){
+      listEl.innerHTML = '';
+      objects.forEach((obj, idx) => {
+        const item = document.createElement('div');
+        item.className = 'item';
+
+        const left = document.createElement('div');
+        const domText = (isFinite(obj.xmin) || isFinite(obj.xmax))
+          ? ` | domain: ${obj.inclusiveMin ? '[' : '('}${isFinite(obj.xmin)?obj.xmin:'-∞'} , ${isFinite(obj.xmax)?obj.xmax:'∞'}${obj.inclusiveMax ? ']' : ')'}` : '';
+        left.innerHTML = `
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="swatch" style="background:${obj.color}"></span>
+            <strong>y = ${obj.expr}</strong>
+          </div>
+          <div class="meta">func${domText}</div>
+        `;
+
+        const right = document.createElement('div');
+        right.className = 'row';
+
+        const edit = document.createElement('button');
+        edit.className = 'btn';
+        edit.textContent = 'Edit';
+        edit.onclick = () => {
+          edit.onclick = () => {
+  const domainPart = (isFinite(obj.xmin) && isFinite(obj.xmax))
+    ? ` , ${obj.inclusiveMin ? obj.xmin+'<=' : obj.xmin+'<'}x${obj.inclusiveMax ? '<=' : '<'}${obj.xmax}`
+    : '';
+  document.getElementById('expr').value = `y = ${obj.expr}${domainPart}`;
+  addFuncBtn.textContent = 'Save Edit';
+  addFuncBtn.dataset.editIndex = String(idx);
+};
+          addFuncBtn.textContent = 'Save Edit';
+          addFuncBtn.dataset.editIndex = String(idx);
+        };
+
+        const vis = document.createElement('button');
+        vis.className = 'btn';
+        vis.textContent = obj.visible ? 'Hide' : 'Show';
+        vis.onclick = () => { obj.visible = !obj.visible; refreshList(); draw(); };
+
+        const del = document.createElement('button');
+        del.className = 'btn danger';
+        del.textContent = 'Delete';
+        del.onclick = () => removeObject(idx);
+
+        right.appendChild(edit);
+        right.appendChild(vis);
+        right.appendChild(del);
+
+        item.appendChild(left);
+        item.appendChild(right);
+        listEl.appendChild(item);
+      });
+    }
+
+    // ---------- Input / actions ----------
+    const exprEl = document.getElementById('expr');
+    const addFuncBtn = document.getElementById('addFunc');
+
+    addFuncBtn.addEventListener('click', () => {
+      errorEl.textContent = '';
+      try {
+        const editIndexStr = addFuncBtn.dataset.editIndex;
+        if (editIndexStr !== undefined) {
+          const idx = parseInt(editIndexStr, 10);
+          updateFunction(idx, exprEl.value);
+          addFuncBtn.textContent = 'Add Function';
+          delete addFuncBtn.dataset.editIndex;
+        } else {
+          addFunction(exprEl.value);
+        }
+        exprEl.value = '';
+      } catch (err) {
+        errorEl.textContent = 'Қате: ' + err.message;
+      }
+    });
+
+    exprEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addFuncBtn.click();
+    });
+
+    // Calculator (evaluates aliases too)
+    const calcBtn = document.getElementById('calcBtn');
+    calcBtn.addEventListener('click', () => {
+      errorEl.textContent = '';
+      try {
+        const s = normalizeAliases(exprEl.value.trim());
+        const val = math.evaluate(s);
+        calcResult.textContent = 'Result: ' + val;
+      } catch (err) {
+        calcResult.textContent = '';
+        errorEl.textContent = 'Қате: ' + err.message;
+      }
+    });
+
+    // Grid toggle / reset
+    const gridToggleBtn = document.getElementById('gridToggle');
+    gridToggleBtn.addEventListener('click', () => {
+      showGrid = !showGrid;
+      gridToggleBtn.textContent = 'Grid: ' + (showGrid ? 'On' : 'Off');
+      draw();
+    });
+    const resetViewBtn = document.getElementById('resetView');
+    resetViewBtn.addEventListener('click', () => {
+      originX = W/2; originY = H/2; scale = 50; draw();
+    });
+
+    // ---------- Mouse pan and zoom ----------
+    let isDragging = false;
+    let lastX = 0, lastY = 0;
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      lastX = e.clientX - rect.left;
+      lastY = e.clientY - rect.top;
+      isDragging = true;
+      canvas.style.cursor = 'grabbing';
+    });
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const w = toWorld(sx, sy);
+      statusEl.textContent = `x=${w.x.toFixed(2)}, y=${w.y.toFixed(2)} | scale=${scale.toFixed(0)} px/unit`;
+
+      if (!isDragging) return;
+      const dx = sx - lastX;
+      const dy = sy - lastY;
+      originX += dx;
+      originY += dy;
+      lastX = sx;
+      lastY = sy;
+      draw();
+    });
+    canvas.addEventListener('mouseup', () => {
+      isDragging = false;
+      canvas.style.cursor = 'grab';
+    });
+    canvas.addEventListener('mouseleave', () => {
+      isDragging = false;
+      canvas.style.cursor = 'grab';
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const before = toWorld(sx, sy);
+      const factor = Math.exp(-e.deltaY / 400);
+      const newScale = Math.min(400, Math.max(10, scale * factor));
+      scale = newScale;
+      // keep cursor world point fixed
+      originX = sx - before.x * scale;
+      originY = sy + before.y * scale;
+      draw();
+    }, { passive: false });
+
+    // ---------- Init ----------
+    function init(){
+      originX = canvas.clientWidth / 2;
+      originY = canvas.clientHeight / 2;
+      resize();
+      // No initial objects
+    }
+    init();
+  </script>
+</body>
+</html>
